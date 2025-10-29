@@ -33,10 +33,28 @@ Se implementó una **Unidad Aritmética-Lógica (ALU)** simple, organizada en tr
 
 ---
 
-### TP2 - Máquinas de Estado
-En progreso.  
+### TP2 - Máquinas de Estado y Control por UART
+Se implementó una interfaz UART que permite controlar la ALU (reutilizada desde TP1) por puerto serie. El diseño incluye un receptor y transmisor UART, un generador de baudios y la lógica de interfaz (máquina de estados) que parsea comandos, invoca la ALU y devuelve resultados por UART.
 
-**Objetivo**: Interactuar con la placa, prefereblemente con la ALU realizada en el TP1, por medio de **UART**. Se busca mandar por puerto serial algún comando a la ALU y que esta realize la operacion requerida, la devuelva y se pueda visualizar el resultado del procesamiento en pantalla.
+**Archivos principales (TP2):**
+- `uart_alu_top.v`  → Módulo top que integra UART, la interfaz FSM y la ALU.  
+- `uart_rx.v`       → Receptor UART (parsing de bytes).  
+- `uart_tx.v`       → Transmisor UART (envío de respuestas).  
+- `baud_gen.v`      → Generador de baudios (configurable).  
+- `interface.v`     → Lógica de control / máquina de estados que interpreta comandos y conecta con la ALU.  
+- `alu.v`           → ALU reutilizada/adaptada desde TP1.
+- `scripts/serial_script.py` → Script Python de ejemplo para interactuar por UART con la FPGA (envía operandos/opcode y muestra resultado).
+
+**Objetivo:**
+Permitir enviar comandos desde un terminal serie (por ejemplo PuTTY o mediante un script) hacia la FPGA para:
+- Seleccionar la operación de la ALU y enviar operandos.
+- Ejecutar la operación en la ALU dentro de la FPGA.
+- Recibir el resultado por UART (y/o visualizarlo en recursos del tablero según constraints).
+
+---
+
+### TP3
+En progreso.  
 
 ---
 
