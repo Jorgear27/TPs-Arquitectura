@@ -1,5 +1,24 @@
 `timescale 1ns / 1ps
-// UART Receiver FSM (8N1) con sobremuestreo 16x
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 15/10/2025 05:56:48 PM
+// Design Name: 
+// Module Name: uart_rx
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: UART Receiver FSM (8N1) con sobremuestreo 16x
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
 module uart_rx #(
     parameter DATA_BITS = 8,
     parameter OVERSAMPLING = 16
@@ -14,9 +33,9 @@ module uart_rx #(
     localparam [2:0] S_IDLE=0, S_START=1, S_DATA=2, S_STOP=3;
 
     reg [1:0] state_reg, state_next;
-    reg [3:0] s_reg, s_next; // para llevar la cuenta de los ticks
-    reg [$clog2(DATA_BITS)-1:0] n_reg, n_next; // para llevar la cuenta de los bits recibidos
-    reg [DATA_BITS-1:0] b_reg, b_next; // para guardar los bits recibidos
+    reg [3:0] s_reg, s_next;                    // para llevar la cuenta de los ticks
+    reg [$clog2(DATA_BITS)-1:0] n_reg, n_next;  // para llevar la cuenta de los bits recibidos
+    reg [DATA_BITS-1:0] b_reg, b_next;          // para guardar los bits recibidos
 
     always @(posedge clk) begin
         if (rst) begin
@@ -49,7 +68,7 @@ module uart_rx #(
                 end
             S_START:
                 if (tick)
-                    if (OVERSAMPLING/2 - 1) // Cuando llega a 7 reseteamos los ticks a 0 para poder leer a la mitad de los bits a los 16 ticks
+                    if (OVERSAMPLING/2 - 1)     // Cuando llega a 7 reseteamos los ticks a 0 para poder leer a la mitad de los bits a los 16 ticks
                     begin
                         s_next = 0;
                         n_next = 0;
@@ -59,14 +78,14 @@ module uart_rx #(
                         s_next = s_reg + 1;
             S_DATA:
                 if (tick)
-                    if (s_reg == (OVERSAMPLING -1)) // Nos encontramos en la mitad del bit
+                    if (s_reg == (OVERSAMPLING -1))     // Nos encontramos en la mitad del bit
                     begin
                         s_next = 0; // Reinciamos los ticks
-                        b_next = {rx, b_reg[DATA_BITS-1:1]}; // Shift a la derecha
+                        b_next = {rx, b_reg[DATA_BITS-1:1]};    // Shift a la derecha
                         if (n_reg == (DATA_BITS-1))
-                            state_next = S_STOP; // Si ya leimos el ultimo bit, paramos
+                            state_next = S_STOP;    // Si ya leimos el ultimo bit, paramos
                         else
-                            n_next = n_reg + 1; // Continuamos para leer el próximo bit
+                            n_next = n_reg + 1;     // Continuamos para leer el próximo bit
                     end
                     else
                         s_next = s_reg + 1;

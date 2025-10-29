@@ -1,24 +1,48 @@
 `timescale 1ns / 1ps
-module interface (
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 15/10/2025 05:58:27 PM
+// Design Name: 
+// Module Name: interface
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: FSM responsable de cargar los operandos en la ALU recibidos mediante uart_rx
+// Luego devuelve el resultado y los flags de la operacion mediante uart_tx
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+module interface #(
+    parameter N_DATA = 8,       // ancho de datos
+    parameter N_OP = 6          // ancho de código de operación
+)(
     input wire clk,
     input wire rst,
-    // UART RX interface
+    // interfaz UART RX
     input wire rx_done,
-    input wire [7:0] rx_data,
-    // UART TX interface
+    input wire [N_DATA-1:0] rx_data,
+    // interfaz UART TX
     output reg tx_start,
-    output reg [7:0] tx_data,
+    output reg [N_DATA-1:0] tx_data,
     input wire tx_done,
-    // ALU interface
-    output reg [7:0] alu_a,
-    output reg [7:0] alu_b,
-    output reg [5:0] alu_opcode,
-    input wire [7:0] alu_result,
+    // interfaz ALU
+    output reg [N_DATA-1:0] alu_a,
+    output reg [N_DATA-1:0] alu_b,
+    output reg [N_OP-1:0] alu_opcode,
+    input wire [N_DATA-1:0] alu_result,
     input wire alu_carry,
     input wire alu_zero
 );
 
-    // FSM States
+    // Estados de la FSM
     localparam [2:0] 
         S_GET_A = 0,
         S_GET_B = 1,
@@ -34,12 +58,12 @@ module interface (
         if (rst) begin
             state <= S_GET_A;
             tx_start <= 1'b0;
-            tx_data <= 8'b0;
-            alu_a <= 8'b0;
-            alu_b <= 8'b0;
-            alu_opcode <= 6'b0;
+            tx_data <= {N_DATA{1'b0}};
+            alu_a <= {N_DATA{1'b0}};
+            alu_b <= {N_DATA{1'b0}};
+            alu_opcode <= {N_OP{1'b0}};
         end else begin
-            // Default: tx_start only pulses for one cycle
+            // tx_start se va a activar solo durante un ciclo
             tx_start <= 1'b0;
             
             case (state)
@@ -59,8 +83,8 @@ module interface (
                 
                 S_GET_OP: begin
                     if (rx_done) begin
-                        alu_opcode <= rx_data[5:0];
-                        // Since ALU is combinational, prepare to send result
+                        alu_opcode <= rx_data[N_OP-1:0];
+                        // Como la ALU es combinacional, pasamos directamente al estado para mandar el resultado
                         state <= S_SEND_RESULT;
                     end
                 end
@@ -78,7 +102,7 @@ module interface (
                 end
                 
                 S_SEND_FLAGS: begin
-                    tx_data <= {6'b000000, alu_carry, alu_zero};
+                    tx_data <= {{(N_DATA-2){1'b0}}, alu_carry, alu_zero};
                     tx_start <= 1'b1;
                     state <= S_WAIT_FLAGS;
                 end

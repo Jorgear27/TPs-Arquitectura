@@ -72,9 +72,9 @@ module tb_uart_alu_top;
         // A = 10 (0x0A)
         // B = 3  (0x03)
         // OpCode = ADD (6'b100000 = 0x20)
-        uart_send_byte(8'h0A);  // A
-        uart_send_byte(8'h0A);  // B
-        uart_send_byte(8'h22);  // SUB;
+        uart_send_byte(8'hFF);  // A
+        uart_send_byte(8'h02);  // B
+        uart_send_byte(8'h20);  // SUB;
 
         // Esperar un tiempo largo para recibir respuesta
         #2000000;
